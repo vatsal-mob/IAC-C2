@@ -1,6 +1,6 @@
-resource "digitalocean_ssh_key" "win_mob1" {
+resource "digitalocean_ssh_key" "c2-key" { #change c2-key to your key name
   name       = "SSH"
-  public_key = "${file("C:/Users/MOB/.ssh/id_rsa.pub")}"
+  public_key = "${file("~/.ssh/id_rsa.pub")}"  #Change to your pub key path
 }
 
 resource "digitalocean_droplet" "covenant-c2" {
@@ -9,13 +9,13 @@ resource "digitalocean_droplet" "covenant-c2" {
     region = "blr1"
     size = "s-1vcpu-1gb"
     private_networking = true
-    ssh_keys = ["${digitalocean_ssh_key.win_mob1.fingerprint}"]
+    ssh_keys = ["${digitalocean_ssh_key.c2-key.fingerprint}"] #change the name here too
 
 connection {
       host = self.ipv4_address
       user = "root"
       type = "ssh"
-      private_key = "${file("C:/Users/MOB/.ssh/id_rsa")}"
+      private_key = "${file("~/.ssh/id_rsa")}" #Change to your priv. key path
       timeout = "2m"
 }
 
