@@ -17,3 +17,23 @@ variable "do_token" {
   type = string
   description = "Your Digital Ocean Token"
 }
+
+variable "instance_size" {
+	type    = string
+	default = "s-1vcpu-1gb"
+}
+
+variable "instance_region" {
+	type    = string
+	default = "blr1"
+}
+
+variable "instance_type" {
+	type    = string
+	default = "ubuntu-18-04-x64"
+}
+
+variable "cin" {
+  type = string
+  default = "1"
+}

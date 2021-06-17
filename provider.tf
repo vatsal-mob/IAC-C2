@@ -20,3 +20,7 @@ provider "cloudflare" {
   api_key = "${var.cloudflare_token}"
 }
 
+resource "digitalocean_ssh_key" "ssh_key" {
+  name = "ssh_key"
+  public_key = "${file("~/.ssh/id_rsa.pub")}"
+}

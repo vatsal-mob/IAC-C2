@@ -1,1 +1,4 @@
-variable.tf
+*.tfvars*
+*.terraform/*
+*.tfstate*
+*.lock*
