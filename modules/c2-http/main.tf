@@ -34,5 +34,5 @@ resource "digitalocean_record" "c2" {
 resource "digitalocean_certificate" "cert" {
   name    = "le-terraform-example"
   type    = "lets_encrypt"
-  domains = ["${digitalocean_record.www.name}.${digitalocean_record.c2.domain}"]
+  domains = ["${digitalocean_record.c2.name}.${digitalocean_record.c2.domain}"]
 }

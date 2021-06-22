@@ -28,11 +28,11 @@ resource "digitalocean_record" "http-redir" {
   domain = "myc2domain.xyz"
   type   = "A"
   name   = "ads-${var.cin}"
-  value  = "${digitalocean_droplet.covenant-c2.ipv4_address}"
+  value  = "${digitalocean_droplet.c2-http-redir.ipv4_address}"
 }
 
 resource "digitalocean_certificate" "cert" {
   name    = "redir-${var.cin}"
   type    = "lets_encrypt"
-  domains = ["${digitalocean_record.www.name}.${digitalocean_record.c2.domain}"]
+  domains = ["${digitalocean_record.http-redir.name}.${digitalocean_record.http-redir.domain}"]
 }
