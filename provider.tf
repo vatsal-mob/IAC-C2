@@ -2,7 +2,7 @@ terraform {
   required_providers {
     digitalocean = {
       source = "digitalocean/digitalocean"
-      version = "1.22.2"
+      version = "2.9.0"
     }
     cloudflare = {
       source = "cloudflare/cloudflare"
@@ -15,10 +15,10 @@ provider "digitalocean" {
   token = "${var.do_token}"
 }
 
-provider "cloudflare" {
+/*provider "cloudflare" {
   email = "${var.cloudflare_email}"
   api_key = "${var.cloudflare_token}"
-}
+}*/
 
 resource "digitalocean_ssh_key" "ssh_key" {
   name = "ssh_key"

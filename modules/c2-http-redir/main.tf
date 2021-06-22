@@ -2,9 +2,16 @@ terraform {
   required_providers {
     digitalocean = {
       source = "digitalocean/digitalocean"
-      version = "1.22.2"
+      version = "2.9.0"
     }
   }
+}
+
+data "template_file" "script" {
+  template = file("modules/c2-http-redir/config.sh")
+  vars = {
+   c2_ip_pass = "${var.c2_ip}"
+ }
 }
 
 resource "digitalocean_droplet" "c2-http-redir" { #creating a droplet for http-redirector
@@ -14,22 +21,18 @@ resource "digitalocean_droplet" "c2-http-redir" { #creating a droplet for http-r
     size = "${var.size}"
     private_networking = true
     ssh_keys = var.ssh_key
-    #ssh_keys = ["${digitalocean_ssh_key.ssh_key.fingerprint}"] 
+    user_data = data.template_file.script.rendered
+}
 
-  connection {
-      host = self.ipv4_address
-      user = "root"
-      type = "ssh"
-      private_key = "${file("~/.ssh/id_rsa")}"
-      timeout = "2m"
-  }
+resource "digitalocean_record" "http-redir" {
+  domain = "myc2domain.xyz"
+  type   = "A"
+  name   = "ads-${var.cin}"
+  value  = "${digitalocean_droplet.covenant-c2.ipv4_address}"
+}
 
-  provisioner "remote-exec" { #setting up http-redir using socat
-    inline = [
-      "export PATH=$PATH:/usr/bin",
-      "wget http://archive.ubuntu.com/ubuntu/pool/main/s/socat/socat_1.7.3.2-2ubuntu2_amd64.deb",
-      "dpkg -i /root/socat_1.7.3.2-2ubuntu2_amd64.deb",
-      "tmux new-session -d -s socat-redir socat TCP4-LISTEN:80,fork TCP4:${var.c2_ip}:80"
-    ]
-  }
+resource "digitalocean_certificate" "cert" {
+  name    = "redir-${var.cin}"
+  type    = "lets_encrypt"
+  domains = ["${digitalocean_record.www.name}.${digitalocean_record.c2.domain}"]
 }

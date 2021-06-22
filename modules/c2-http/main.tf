@@ -2,9 +2,13 @@ terraform {
   required_providers {
     digitalocean = {
       source = "digitalocean/digitalocean"
-      version = "1.22.2"
+      version = "2.9.0"
     }
   }
+}
+
+data "template_file" "script" {
+  template = file("modules/c2-http/covenant.sh")
 }
 
 resource "digitalocean_droplet" "covenant-c2" { #create a new droplet which will be our main c2 server
@@ -14,22 +18,21 @@ resource "digitalocean_droplet" "covenant-c2" { #create a new droplet which will
     size = "${var.size}"
     private_networking = true
     ssh_keys = var.ssh_key
-    
-  connection {
-      host = self.ipv4_address
-      user = "root"
-      type = "ssh"
-      private_key = "${file("~/.ssh/id_rsa")}"
-      timeout = "2m"
-  }
-  provisioner "remote-exec" { #installing covenant on our droplet
-    inline = [
-      "export PATH=$PATH:/usr/bin",
-      "sudo curl -sSL https://get.docker.com/ | sh",
-      "sudo apt install -y git",
-      "git clone --recurse-submodules https://github.com/cobbr/Covenant",
-      "docker build -t covenant /root/Covenant/Covenant/",
-      "docker run -d -p 7443:7443 -p 80:80 -p 443:443 --name covenant -v /root/Covenant/Covenant/Data/:/app/Data covenant"
-    ]
-  }
+    user_data = data.template_file.script.rendered
+    lifecycle {
+      create_before_destroy = true
+    }
+}
+
+resource "digitalocean_record" "c2" {
+  domain = "myc2domain.xyz"
+  type   = "A"
+  name   = "cov"
+  value  = "${digitalocean_droplet.covenant-c2.ipv4_address}"
+}
+
+resource "digitalocean_certificate" "cert" {
+  name    = "le-terraform-example"
+  type    = "lets_encrypt"
+  domains = ["${digitalocean_record.www.name}.${digitalocean_record.c2.domain}"]
 }

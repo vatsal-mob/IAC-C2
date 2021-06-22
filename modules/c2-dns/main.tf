@@ -10,9 +10,8 @@ terraform {
 
 resource "cloudflare_record" "covenant-main" { #creating record for your main c2
   zone_id = var.zone
-  name   = "cov"  #this will create something like covenant-main.domain.xyz
+  name   = "cov"  #this will create something like cov.domain.xyz
   value  = var.ipv4
-  #value  = "${module.c2-http.ipv4_address}"
   type   = "A"
   ttl    = 3600
 }
